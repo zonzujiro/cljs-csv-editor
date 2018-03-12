@@ -2,21 +2,27 @@
   (:require [rum.core :as rum]
             [goog.labs.format.csv :as csv]))
 
-(defn validate [file]
-   (< file.size 100))
+(defn valid-file? [file]
+   (and (= file.type "text/csv") (< file.size 100)))
 
-(defn to-vector [arrays]
-  (map vector arrays))
+(def get-file #(-> % .-target .-files (aget 0)))
+(def parse-csv #(-> % .-target .-result csv/parse))
 
-(defn build-reader [on-loadend]
-  (let [reader (js/FileReader.)]
-    (set! (.-onloadend reader) #(-> % .-target .-result csv/parse js->clj on-loadend))
+(defn convert-to-numbers [table]
+  (into [] (concat [(first table)] (map #(-> [(first %) (int (second %))]) (rest table)))))
+                             
+(defn valid-table? [table]
+  (every? #(= (count %) 2) table))
+
+(defn build-reader [on-success on-error]
+  (let [reader (js/FileReader.)
+        handle-loadend #(if (valid-table? %) (on-success %) (on-error))]
+    (set! (.-onloadend reader) #(-> % parse-csv js->clj convert-to-numbers handle-loadend))
     reader))
 
 (rum/defc Uploader [{:keys [handle-file handle-error handle-reset error? rows]}]
-  (let [reader (build-reader handle-file)
-        run-reader #(if (validate %) (.readAsText reader %) (handle-error))
-        get-file #(-> % .-target .-files (aget 0))
+  (let [reader (build-reader handle-file handle-error)
+        run-reader #(if (valid-file? %) (.readAsText reader %) (handle-error))
         on-change #(when-not (undefined? (get-file %)) (run-reader (get-file %)))]
       [:div.uploader
         (when (empty? rows)

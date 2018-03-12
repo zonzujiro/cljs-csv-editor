@@ -5,11 +5,11 @@
   (when (not-empty rows) 
     (let [sum (reduce + (map #(-> % second int) rows))]
       [:div.widget
-        [:h2 "Aggregated results"
-          [:section.sum
-            [:span "Sum"]
-            [:p sum]]
-          [:section.average
-            [:span "Average"]
-            [:p (int (/ sum (count rows)))]]]])))
+        [:h2 "Aggregated results"]
+        [:section.sum
+          [:h3 "Sum"]
+          [:p sum]]
+        [:section.average
+          [:h3 "Average"]
+          [:p (int (/ sum (count rows)))]]])))
     

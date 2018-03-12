@@ -10,6 +10,7 @@
   [{state ::state}]
   (js/console.log (clj->js @state))
   [:div.root-container
+   [:h1 "CSV table editor"]
    (Uploader {:handle-file #(swap! state assoc :rows % :error? false)
               :handle-error #(swap! state assoc :error? true)
               :handle-reset #(reset! state init-state)
