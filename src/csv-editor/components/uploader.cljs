@@ -3,7 +3,8 @@
             [goog.labs.format.csv :as csv]))
 
 (defn valid-file? [file]
-   (and (= file.type "text/csv") (< file.size 100)))
+   (js/console.log file)
+   (and (or (= file.type "text/csv") (= file.type "application/vnd.ms-excel")) (< file.size 100)))
 
 (def get-file #(-> % .-target .-files (aget 0)))
 (def parse-csv #(-> % .-target .-result csv/parse))
