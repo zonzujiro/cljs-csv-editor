@@ -8,7 +8,6 @@
 
 (rum/defcs App < (rum/local init-state ::state)
   [{state ::state}]
-  (js/console.log (clj->js @state))
   [:div.root-container
    [:h1 "CSV table editor"]
    (Uploader {:handle-file #(swap! state assoc :rows % :error? false)
