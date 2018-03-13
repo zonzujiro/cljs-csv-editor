@@ -8,14 +8,14 @@
                :on-change #(-> % .-target .-value handle-change)
                :type (if number? "number" "text")}]]))
 
-
 (rum/defc Row [{:keys [row-index row-items on-change]}]
   [:tr {:key row-index}
     (map-indexed 
       (fn [cell-index value]
-        (Cell {:on-change #(on-change (assoc row-items cell-index %))
-               :number? (integer? value)
-               :value value}))
+        (let [props {:on-change #(on-change (assoc row-items cell-index %))
+                     :number? (integer? value)
+                     :value value}]
+          (rum/with-key (Cell props) cell-index)))
       row-items)])
 
 (rum/defc Table [{:keys [rows on-change]}]
@@ -23,7 +23,8 @@
     [:tbody
       (map-indexed 
         (fn [index row]
-          (Row {:row-index index
-                :row-items row
-                :on-change #(on-change (assoc rows index %))})) 
+          (let [props {:row-index index
+                       :row-items row
+                       :on-change #(on-change (assoc rows index %))}]
+            (rum/with-key (Row props) index)))
        rows)]])

@@ -3,13 +3,12 @@
             [goog.labs.format.csv :as csv]))
 
 (defn valid-file? [file]
-  ;For some reason file type was changed after passing file thru skype
+  ;For some reason file type can be changed if file opened in MacOS
    (and (or 
           (= file.type "text/csv") 
           (= file.type "application/vnd.ms-excel")) 
       (< file.size 100)))
 
-(def get-file #(-> % .-target .-files (aget 0)))
 (def parse-csv #(-> % .-target .-result csv/parse))
 
 (defn concat-with-numbers [table]
@@ -27,7 +26,9 @@
 (rum/defc Uploader [{:keys [handle-file handle-error handle-reset error? rows]}]
   (let [reader (build-reader handle-file handle-error)
         run-reader #(if (valid-file? %) (.readAsText reader %) (handle-error))
-        on-change #(when-not (undefined? (get-file %)) (run-reader (get-file %)))]
+        on-change (fn [ev]
+                    (let [file (-> ev .-target .-files (aget 0))]
+                       (when-not (undefined? file) (run-reader file))))]
       [:div.uploader
         (when (empty? rows)
           [:label.upload-button
